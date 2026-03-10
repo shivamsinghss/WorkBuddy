@@ -1,5 +1,5 @@
 # Step 1: Build stage
-FROM gradle:8.5-jdk17 AS builder
+FROM gradle:8.14-jdk17 AS builder
 WORKDIR /app
 
 # Copy all Gradle files
