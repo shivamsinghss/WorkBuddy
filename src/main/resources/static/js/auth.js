@@ -1,6 +1,6 @@
 /* ===== WorkBuddy Auth (shared across pages) ===== */
 const AUTH_KEY  = 'workbuddy_user';
-const API_BASE  = 'http://localhost:8000';
+const API_BASE  = 'https://workbuddy-gdzp.onrender.com';
 
 function getUser() {
     try { return JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) { return null; }
@@ -67,12 +67,13 @@ function submitEmailSignIn() {
     if (!valid) return;
 
     showStep('step-loading');
-    document.getElementById('loading-text').textContent = 'Signing in...';
+    document.getElementById('loading-text').textContent = 'Waking up server… this may take up to 50 seconds on first request.';
 
     fetch(API_BASE + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: usernameEl.value.trim(), password: passEl.value.trim() })
+        body: JSON.stringify({ username: usernameEl.value.trim(), password: passEl.value.trim() }),
+        signal: AbortSignal.timeout(90000)
     })
     .then(r => r.json())
     .then(data => {
@@ -98,7 +99,7 @@ function submitEmailSignIn() {
     })
     .catch(() => {
         showStep('step-email');
-        alert('Could not connect to server. Make sure the backend is running on port 8000.');
+        alert('Server is taking too long to respond. Please wait a moment and try again.');
     });
 }
 
