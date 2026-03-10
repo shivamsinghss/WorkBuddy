@@ -11,6 +11,7 @@ COPY src /app/src
 # Run build
 RUN gradle bootJar --no-daemon
 
+
 # Step 2: Runtime stage
 FROM eclipse-temurin:17-jre
 WORKDIR /app
