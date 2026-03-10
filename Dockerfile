@@ -1,35 +1,21 @@
-# ── Stage 1: Build ──────────────────────────────────────────
-FROM gradle:8.7-jdk17 AS builder
-
+# Step 1: Build stage
+FROM gradle:8.5-jdk17 AS builder
 WORKDIR /app
 
-# Copy dependency files first for layer caching
-COPY build.gradle settings.gradle ./
-COPY gradle ./gradle
+# Copy Gradle files first (for caching)
+COPY build.gradle settings.gradle /app/
+COPY src /app/src
 
-# Download dependencies (cached unless build.gradle changes)
-RUN gradle dependencies --no-daemon || true
-
-# Copy source and build
-COPY src ./src
+# Run build (bootJar) -> output goes to /app/build/libs/*.jar
 RUN gradle bootJar --no-daemon
 
-# ── Stage 2: Run ─────────────────────────────────────────────
-FROM eclipse-temurin:17-jre-alpine
-
+# Step 2: Runtime stage
+FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-# Create data directory for Excel storage
-RUN mkdir -p /app/data
-
-# Copy the built JAR from builder stage
+# Copy jar from build stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Expose the application port
-EXPOSE 8000
+EXPOSE 8080
 
-# Mount point for persisting Excel data files
-VOLUME /app/data
-
-# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
