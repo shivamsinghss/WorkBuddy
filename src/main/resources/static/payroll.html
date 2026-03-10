@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WorkBuddy &mdash; Payroll</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <style>
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .summary-card {
+            background: #1e1e2e;
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 14px;
+            padding: 20px 22px;
+        }
+        .sc-label { font-size: 11px; font-weight: 600; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:6px; }
+        .sc-value { font-size: 28px; font-weight: 700; }
+        .sc-sub   { font-size: 12px; color:rgba(255,255,255,0.4); margin-top:4px; }
+        .sc-green .sc-value { color:#34d399; }
+        .sc-yellow .sc-value { color:#fbbf24; }
+        .sc-blue  .sc-value { color:#818cf8; }
+        .sc-red   .sc-value { color:#f87171; }
+
+        .salary-hero {
+            background: linear-gradient(135deg,rgba(99,102,241,.18),rgba(139,92,246,.10));
+            border: 1px solid rgba(99,102,241,.25);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .sh-item { display:flex; flex-direction:column; gap:4px; }
+        .sh-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:rgba(255,255,255,.4); }
+        .sh-value { font-size:22px; font-weight:700; color:#fff; }
+        .sh-value.green { color:#34d399; }
+        .sh-value.purple { color:#818cf8; }
+        .sh-sep { width:1px; background:rgba(255,255,255,.08); align-self:stretch; }
+        .sh-actions { margin-left:auto; }
+        .btn-download-slip {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer;
+            background: rgba(99,102,241,0.25); color: #818cf8;
+            font-size: 13px; font-weight: 600; transition: background .2s;
+        }
+        .btn-download-slip:hover { background: rgba(99,102,241,0.4); }
+        .btn-icon.download { color: #818cf8; }
+        .btn-icon.download:hover { background: rgba(99,102,241,0.2); }
+
+        /* Download picker modal */
+        .dl-tabs { display:flex; gap:8px; margin-bottom:20px; }
+        .dl-tab {
+            flex:1; padding:10px; border-radius:8px; border:1px solid rgba(99,102,241,0.3);
+            background:transparent; color:rgba(255,255,255,0.5); font-size:13px; font-weight:600;
+            cursor:pointer; transition:all .15s;
+        }
+        .dl-tab.active { background:rgba(99,102,241,0.25); color:#818cf8; border-color:#6366f1; }
+        .dl-panel { display:none; } .dl-panel.active { display:block; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="navbar-brand">
+            <div class="logo-icon">W</div>
+            <span class="brand-name">Work<span>Buddy</span></span>
+        </a>
+        <div class="navbar-actions">
+            <a href="services.html" class="nav-services-link" style="color:#fff;background:rgba(99,102,241,0.2);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" /></svg>
+                Services
+            </a>
+            <button class="btn-signin" id="btn-signin" onclick="openSignInModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H3" /></svg>
+                Sign In
+            </button>
+            <div class="profile-wrapper" id="profile-section" style="display:none;">
+                <button class="profile-btn" id="profile-btn">
+                    <div class="profile-avatar" id="nav-avatar">??</div>
+                    <span class="profile-name" id="nav-name">Loading</span>
+                    <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                </button>
+                <div class="profile-dropdown" id="profile-dropdown">
+                    <div class="profile-dropdown-header">
+                        <div class="full-name" id="nav-full-name">-</div>
+                        <div class="email" id="nav-email">-</div>
+                    </div>
+                    <a href="employees.html"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg> My Profile</a>
+                    <div class="divider"></div>
+                    <a href="#" class="logout" onclick="signOut(); return false;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg> Sign Out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="page-content">
+        <div class="page-inner">
+
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Payroll</div>
+                    <div class="page-subtitle" id="page-subtitle">Salary records and payment status</div>
+                </div>
+                <button class="btn-add" id="btn-add-payroll" onclick="openAddModal()" style="display:none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    Add Payroll
+                </button>
+            </div>
+
+            <!-- Employee: salary hero (shown only for employees) -->
+            <div class="salary-hero" id="salary-hero" style="display:none;">
+                <div class="sh-item">
+                    <div class="sh-label">Yearly Salary</div>
+                    <div class="sh-value green" id="sh-annual">—</div>
+                </div>
+                <div class="sh-sep"></div>
+                <div class="sh-item">
+                    <div class="sh-label">Fixed Monthly Gross</div>
+                    <div class="sh-value" id="sh-monthly">—</div>
+                </div>
+                <div class="sh-sep"></div>
+                <div class="sh-item">
+                    <div class="sh-label">Department</div>
+                    <div class="sh-value purple" id="sh-dept">—</div>
+                </div>
+                <div class="sh-sep"></div>
+                <div class="sh-item">
+                    <div class="sh-label">Position</div>
+                    <div class="sh-value" id="sh-position">—</div>
+                </div>
+                <div class="sh-actions">
+                    <button class="btn-download-slip" onclick="openDownloadModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:15px;height:15px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        Download Pay Slip
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin: summary cards -->
+            <div class="summary-grid" id="summary-grid" style="display:none;">
+                <div class="summary-card sc-blue">
+                    <div class="sc-label">Total This Month</div>
+                    <div class="sc-value" id="sc-total">—</div>
+                    <div class="sc-sub" id="sc-total-sub">payroll records</div>
+                </div>
+                <div class="summary-card sc-green">
+                    <div class="sc-label">Paid</div>
+                    <div class="sc-value" id="sc-paid">0</div>
+                    <div class="sc-sub">records processed</div>
+                </div>
+                <div class="summary-card sc-yellow">
+                    <div class="sc-label">Pending</div>
+                    <div class="sc-value" id="sc-pending">0</div>
+                    <div class="sc-sub">awaiting payment</div>
+                </div>
+                <div class="summary-card sc-red">
+                    <div class="sc-label">Total Payout</div>
+                    <div class="sc-value" id="sc-payout">—</div>
+                    <div class="sc-sub">net salary sum</div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th id="col-name">Employee</th>
+                            <th>Month / Year</th>
+                            <th>Basic</th>
+                            <th>Bonus</th>
+                            <th>Deductions</th>
+                            <th>Net Salary</th>
+                            <th>Status</th>
+                            <th id="col-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payroll-tbody">
+                        <tr class="loading-row"><td colspan="8">Loading payroll records…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Add / Edit Modal -->
+    <div class="dash-modal-overlay" id="payroll-modal">
+        <div class="dash-modal-card">
+            <button class="dash-modal-close" onclick="closeModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+            </button>
+            <div class="dash-modal-title" id="modal-title">Add Payroll Record</div>
+
+            <div class="form-group">
+                <label class="form-label">Employee</label>
+                <select id="f-employee-sel" class="form-select" onchange="onEmployeePick()">
+                    <option value="">Select employee…</option>
+                </select>
+            </div>
+            <!-- hidden fields populated by picker -->
+            <input type="hidden" id="f-employee-id" />
+            <input type="hidden" id="f-employee-name" />
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Month</label>
+                    <select id="f-month" class="form-select">
+                        <option>January</option><option>February</option><option>March</option>
+                        <option>April</option><option>May</option><option>June</option>
+                        <option>July</option><option>August</option><option>September</option>
+                        <option>October</option><option>November</option><option>December</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Year</label>
+                    <input type="number" id="f-year" class="form-input" placeholder="2026" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Basic Salary</label>
+                    <input type="number" id="f-basic-salary" class="form-input" placeholder="0" min="0" oninput="calcNet()" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bonus</label>
+                    <input type="number" id="f-bonus" class="form-input" placeholder="0" min="0" oninput="calcNet()" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Deductions</label>
+                    <input type="number" id="f-deductions" class="form-input" placeholder="0" min="0" oninput="calcNet()" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Net Salary <span style="color:rgba(255,255,255,0.3);font-size:11px;">(auto)</span></label>
+                    <input type="number" id="f-net-salary" class="form-input" placeholder="0" readonly style="opacity:0.7;" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Status</label>
+                <select id="f-status" class="form-select">
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-save" onclick="submitForm()">Save Record</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <div class="dash-modal-overlay" id="delete-modal">
+        <div class="dash-modal-card narrow">
+            <div class="confirm-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+            </div>
+            <div class="confirm-title">Delete Record</div>
+            <div class="confirm-text">This payroll record will be permanently removed.</div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn-confirm-delete" onclick="doDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Pay Slip Picker Modal -->
+    <div class="dash-modal-overlay" id="download-modal">
+        <div class="dash-modal-card narrow">
+            <button class="dash-modal-close" onclick="closeDownloadModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+            </button>
+            <div class="dash-modal-title">Download Pay Slip</div>
+
+            <div class="dl-tabs">
+                <button class="dl-tab active" id="tab-month" onclick="switchDlTab('month')">By Month</button>
+                <button class="dl-tab"        id="tab-year"  onclick="switchDlTab('year')">By Year</button>
+            </div>
+
+            <!-- By Month panel -->
+            <div class="dl-panel active" id="panel-month">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Month</label>
+                        <select id="dl-month" class="form-select">
+                            <option>January</option><option>February</option><option>March</option>
+                            <option>April</option><option>May</option><option>June</option>
+                            <option>July</option><option>August</option><option>September</option>
+                            <option>October</option><option>November</option><option>December</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Year</label>
+                        <input type="number" id="dl-month-year" class="form-input" placeholder="2026" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick="closeDownloadModal()">Cancel</button>
+                    <button class="btn-save" onclick="downloadByMonth()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        Download
+                    </button>
+                </div>
+            </div>
+
+            <!-- By Year panel -->
+            <div class="dl-panel" id="panel-year">
+                <div class="form-group">
+                    <label class="form-label">Year</label>
+                    <input type="number" id="dl-year" class="form-input" placeholder="2026" />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick="closeDownloadModal()">Cancel</button>
+                    <button class="btn-save" onclick="downloadByYear()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="auth-modal-card">
+            <button class="modal-close" onclick="closeSignInModal()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg></button>
+            <div id="step-provider" class="modal-step">
+                <div class="modal-logo"><div class="logo-icon" style="width:38px;height:38px;font-size:17px;">W</div><span class="brand-name" style="font-size:18px;">Work<span>Buddy</span></span></div>
+                <h2 class="modal-title">Sign in to WorkBuddy</h2><p class="modal-subtitle">Choose how you'd like to continue</p>
+                <button class="provider-btn" onclick="showEmailStep()"><span class="provider-icon email"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg></span>Continue with Email</button>
+            </div>
+            <div id="step-loading" class="modal-step" style="display:none;"><div class="modal-loading"><div class="spinner"></div><p id="loading-text">Connecting...</p></div></div>
+            <div id="step-email" class="modal-step" style="display:none;">
+                <button class="modal-back" onclick="showProviderStep()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg> Back</button>
+                <h2 class="modal-title">Sign in</h2><p class="modal-subtitle">Use your WorkBuddy credentials</p>
+                <div class="modal-form-group"><label class="modal-label">Username or Email</label><input type="text" id="email-username" class="modal-input" /></div>
+                <div class="modal-form-group"><label class="modal-label">Password</label><input type="password" id="email-password" class="modal-input" /></div>
+                <button class="modal-submit" onclick="submitEmailSignIn()">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+    const user    = getUser();
+    const isAdmin = user && user.role === 'admin';
+    let allRecords   = [];
+    let allEmployees = [];
+    let editingId    = null;
+    let deleteId     = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!user) { window.location.href = 'services.html'; return; }
+        initNavAuth();
+        window.addEventListener('scroll', () =>
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20));
+
+        if (isAdmin) {
+            document.getElementById('btn-add-payroll').style.display = 'inline-flex';
+            document.getElementById('summary-grid').style.display    = 'grid';
+            allEmployees = (await Api.employees.getAll().catch(() => [])) || [];
+            populateEmployeePicker();
+        } else {
+            // Employee: show salary hero from their profile
+            document.getElementById('salary-hero').style.display = 'flex';
+            document.getElementById('col-name').style.display    = 'none';
+            document.getElementById('col-actions').textContent   = '';
+            loadEmployeeHero();
+        }
+
+        loadData();
+    });
+
+    /* ── Employee salary hero ── */
+    async function loadEmployeeHero() {
+        try {
+            const emp = user.id !== 'admin'
+                ? await Api.employees.getById(user.id).catch(() => null)
+                : null;
+            const yearly  = emp?.salary || 0;
+            const monthly = yearly ? Math.round(yearly / 12) : 0;
+            const fmt = n => n ? '$' + Number(n).toLocaleString() : '—';
+            document.getElementById('sh-annual').textContent   = fmt(yearly);
+            document.getElementById('sh-monthly').textContent  = fmt(monthly);
+            document.getElementById('sh-dept').textContent     = emp?.department || user.department || '—';
+            document.getElementById('sh-position').textContent = emp?.position   || user.position   || '—';
+        } catch (e) { /* hero stays with dashes */ }
+    }
+
+    /* ── Load payroll table ── */
+    async function loadData() {
+        const tbody = document.getElementById('payroll-tbody');
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="8">Loading…</td></tr>';
+        try {
+            let records = await Api.payroll.getAll();
+            allRecords  = records || [];
+
+            if (!isAdmin) {
+                records = records.filter(r => r.employeeId === user.id);
+            }
+
+            if (isAdmin) updateSummary(records);
+
+            if (!records.length) {
+                const msg = isAdmin ? 'No payroll records yet. Use "Add Payroll" to create one.'
+                                    : 'No payroll records have been generated for your account yet.';
+                tbody.innerHTML = `<tr class="empty-state"><td colspan="8">${msg}</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = records.map(r => {
+                const fmt = n => '$' + (Number(n) || 0).toLocaleString();
+                const badge = r.status === 'Paid' ? 'badge-green' : 'badge-yellow';
+                const rid = r.id;
+                const actions = isAdmin ? `
+                    <div class="action-btns">
+                        <button class="btn-icon download" title="Download Pay Slip" onclick="downloadPaySlip('${rid}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        </button>
+                        ${r.status !== 'Paid' ? `<button class="btn-icon success" title="Mark Paid" onclick="markPaid('${rid}')">✓</button>` : ''}
+                        <button class="btn-icon" title="Edit" onclick="openEditModal('${rid}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" /></svg>
+                        </button>
+                        <button class="btn-icon danger" title="Delete" onclick="openDeleteModal('${rid}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                        </button>
+                    </div>` : `
+                    <div class="action-btns">
+                        <button class="btn-icon download" title="Download Pay Slip" onclick="downloadPaySlip('${rid}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        </button>
+                    </div>`;
+                return `<tr>
+                    ${isAdmin ? `<td><div class="cell-name">${esc(r.employeeName||'—')}</div><div class="cell-sub">${esc(r.employeeId||'')}</div></td>` : ''}
+                    <td>${r.month || '—'} ${r.year || ''}</td>
+                    <td>${fmt(r.basicSalary)}</td>
+                    <td>${fmt(r.bonus)}</td>
+                    <td>${fmt(r.deductions)}</td>
+                    <td style="font-weight:700;color:#fff;">${fmt(r.netSalary)}</td>
+                    <td><span class="badge ${badge}">${r.status || '—'}</span></td>
+                    <td>${actions}</td>
+                </tr>`;
+            }).join('');
+        } catch (e) {
+            tbody.innerHTML = `<tr class="empty-state"><td colspan="8">Failed to load payroll records. Is the server running?</td></tr>`;
+        }
+    }
+
+    function updateSummary(records) {
+        const fmt = n => '$' + Math.round(n).toLocaleString();
+        const paid    = records.filter(r => r.status === 'Paid').length;
+        const pending = records.filter(r => r.status !== 'Paid').length;
+        const payout  = records.reduce((s, r) => s + (Number(r.netSalary) || 0), 0);
+        document.getElementById('sc-total').textContent   = records.length;
+        document.getElementById('sc-total-sub').textContent = records.length === 1 ? 'payroll record' : 'payroll records';
+        document.getElementById('sc-paid').textContent    = paid;
+        document.getElementById('sc-pending').textContent = pending;
+        document.getElementById('sc-payout').textContent  = fmt(payout);
+    }
+
+    /* ── Employee picker ── */
+    function populateEmployeePicker() {
+        const sel = document.getElementById('f-employee-sel');
+        allEmployees.forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = e.id;
+            opt.dataset.name   = (e.firstName || '') + ' ' + (e.lastName || '');
+            opt.dataset.salary = e.salary || 0;
+            opt.textContent    = opt.dataset.name.trim() + ' (' + e.id + ')';
+            sel.appendChild(opt);
+        });
+    }
+
+    function onEmployeePick() {
+        const sel = document.getElementById('f-employee-sel');
+        const opt = sel.options[sel.selectedIndex];
+        document.getElementById('f-employee-id').value   = opt.value;
+        document.getElementById('f-employee-name').value = opt.dataset.name || '';
+        if (opt.dataset.salary) {
+            const monthly = Math.round(Number(opt.dataset.salary) / 12);
+            document.getElementById('f-basic-salary').value = monthly;
+            calcNet();
+        }
+    }
+
+    function calcNet() {
+        const basic  = parseFloat(document.getElementById('f-basic-salary').value) || 0;
+        const bonus  = parseFloat(document.getElementById('f-bonus').value)        || 0;
+        const deduct = parseFloat(document.getElementById('f-deductions').value)   || 0;
+        document.getElementById('f-net-salary').value = basic + bonus - deduct;
+    }
+
+    /* ── Add / Edit Modal ── */
+    function openAddModal() {
+        editingId = null;
+        document.getElementById('modal-title').textContent = 'Add Payroll Record';
+        document.getElementById('f-employee-sel').value = '';
+        document.getElementById('f-employee-id').value  = '';
+        document.getElementById('f-employee-name').value = '';
+        ['f-basic-salary','f-bonus','f-deductions','f-net-salary'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('f-status').value = 'Pending';
+        const now = new Date();
+        document.getElementById('f-year').value  = now.getFullYear();
+        document.getElementById('f-month').value = now.toLocaleString('en-US', { month:'long' });
+        document.getElementById('payroll-modal').classList.add('open');
+    }
+
+    function openEditModal(id) {
+        const r = allRecords.find(r => r.id === id);
+        if (!r) return;
+        editingId = id;
+        document.getElementById('modal-title').textContent = 'Edit Payroll Record';
+        // Set picker to matching employee
+        const sel = document.getElementById('f-employee-sel');
+        sel.value = r.employeeId || '';
+        document.getElementById('f-employee-id').value    = r.employeeId   || '';
+        document.getElementById('f-employee-name').value  = r.employeeName || '';
+        document.getElementById('f-month').value          = r.month        || 'January';
+        document.getElementById('f-year').value           = r.year         || new Date().getFullYear();
+        document.getElementById('f-basic-salary').value   = r.basicSalary  || '';
+        document.getElementById('f-bonus').value          = r.bonus        || '';
+        document.getElementById('f-deductions').value     = r.deductions   || '';
+        document.getElementById('f-net-salary').value     = r.netSalary    || '';
+        document.getElementById('f-status').value         = r.status       || 'Pending';
+        document.getElementById('payroll-modal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('payroll-modal').classList.remove('open');
+        editingId = null;
+    }
+
+    async function submitForm() {
+        const employeeId   = document.getElementById('f-employee-id').value.trim();
+        const employeeName = document.getElementById('f-employee-name').value.trim();
+        if (!employeeId) { showToast('error', 'Please select an employee'); return; }
+        const basicSalary = parseFloat(document.getElementById('f-basic-salary').value) || 0;
+        const bonus       = parseFloat(document.getElementById('f-bonus').value)        || 0;
+        const deductions  = parseFloat(document.getElementById('f-deductions').value)   || 0;
+        const data = {
+            employeeId, employeeName,
+            month:       document.getElementById('f-month').value,
+            year:        parseInt(document.getElementById('f-year').value) || new Date().getFullYear(),
+            basicSalary, bonus, deductions,
+            netSalary:   basicSalary + bonus - deductions,
+            status:      document.getElementById('f-status').value
+        };
+        try {
+            if (editingId) await Api.payroll.update(editingId, data);
+            else           await Api.payroll.create(data);
+            showToast('success', editingId ? 'Record updated' : 'Record added');
+            closeModal();
+            loadData();
+        } catch (e) { showToast('error', 'Failed to save record'); }
+    }
+
+    /* ── Mark Paid ── */
+    async function markPaid(id) {
+        try {
+            await Api.payroll.markPaid(id);
+            showToast('success', 'Marked as Paid');
+            loadData();
+        } catch (e) { showToast('error', 'Failed to update status'); }
+    }
+
+    /* ── Delete ── */
+    function openDeleteModal(id) {
+        deleteId = id;
+        document.getElementById('delete-modal').classList.add('open');
+    }
+    function closeDeleteModal() {
+        document.getElementById('delete-modal').classList.remove('open');
+        deleteId = null;
+    }
+    async function doDelete() {
+        try {
+            await Api.payroll.delete(deleteId);
+            showToast('success', 'Record deleted');
+            closeDeleteModal();
+            loadData();
+        } catch (e) { showToast('error', 'Delete failed'); closeDeleteModal(); }
+    }
+
+    /* ── Pay Slip Download ── */
+    function downloadPaySlip(id) {
+        const r = allRecords.find(r => r.id === id);
+        if (!r) { showToast('error', 'Record not found'); return; }
+        openPaySlipWindow([r], r.month + ' ' + r.year);
+    }
+
+    function openDownloadModal() {
+        const myRecords = allRecords.filter(r => r.employeeId === user.id);
+        if (!myRecords.length) { showToast('error', 'No payroll records available yet'); return; }
+        const now = new Date();
+        document.getElementById('dl-month').value      = now.toLocaleString('en-US', { month:'long' });
+        document.getElementById('dl-month-year').value = now.getFullYear();
+        document.getElementById('dl-year').value       = now.getFullYear();
+        switchDlTab('month');
+        document.getElementById('download-modal').classList.add('open');
+    }
+
+    function closeDownloadModal() {
+        document.getElementById('download-modal').classList.remove('open');
+    }
+
+    function switchDlTab(tab) {
+        ['month','year'].forEach(t => {
+            document.getElementById('tab-'   + t).classList.toggle('active', t === tab);
+            document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+        });
+    }
+
+    function downloadByMonth() {
+        const month = document.getElementById('dl-month').value;
+        const year  = parseInt(document.getElementById('dl-month-year').value);
+        if (!year) { showToast('error', 'Please enter a year'); return; }
+        const myRecords = allRecords.filter(r => r.employeeId === user.id);
+        const rec = myRecords.find(r => r.month === month && Number(r.year) === year);
+        if (!rec) { showToast('error', `No record found for ${month} ${year}`); return; }
+        closeDownloadModal();
+        openPaySlipWindow([rec], month + ' ' + year);
+    }
+
+    function downloadByYear() {
+        const year = parseInt(document.getElementById('dl-year').value);
+        if (!year) { showToast('error', 'Please enter a year'); return; }
+        const myRecords = allRecords.filter(r => r.employeeId === user.id && Number(r.year) === year);
+        if (!myRecords.length) { showToast('error', `No records found for ${year}`); return; }
+        const monthOrder = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        myRecords.sort((a, b) => monthOrder.indexOf(a.month) - monthOrder.indexOf(b.month));
+        closeDownloadModal();
+        openPaySlipWindow(myRecords, 'Year ' + year);
+    }
+
+    function openPaySlipWindow(records, period) {
+        const fmt = n => '$' + (Number(n)||0).toLocaleString();
+        const now = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+        const emp = records[0];
+        const isMulti = records.length > 1;
+
+        const totalBasic    = records.reduce((s,r) => s + (Number(r.basicSalary)||0), 0);
+        const totalBonus    = records.reduce((s,r) => s + (Number(r.bonus)||0), 0);
+        const totalDeduct   = records.reduce((s,r) => s + (Number(r.deductions)||0), 0);
+        const totalNet      = records.reduce((s,r) => s + (Number(r.netSalary)||0), 0);
+
+        const monthRows = isMulti ? records.map(r => `
+            <tr>
+              <td style="color:#888;font-size:13px;">${r.month}</td>
+              <td>${fmt(r.basicSalary)}</td>
+              <td>+${fmt(r.bonus)}</td>
+              <td>−${fmt(r.deductions)}</td>
+              <td style="font-weight:700;">${fmt(r.netSalary)}</td>
+              <td><span class="status-badge ${r.status==='Paid'?'status-paid':'status-pending'}">${r.status||'—'}</span></td>
+            </tr>`).join('') : '';
+
+        const singleRows = !isMulti ? `
+            <tr><td>Basic Salary</td><td>${fmt(emp.basicSalary)}</td></tr>
+            <tr><td>Bonus</td><td>+ ${fmt(emp.bonus)}</td></tr>
+            <tr><td>Deductions</td><td>− ${fmt(emp.deductions)}</td></tr>
+            <tr class="total-row"><td>Net Salary</td><td>${fmt(emp.netSalary)}</td></tr>` : '';
+
+        const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+<title>Pay Slip — ${emp.employeeName} — ${period}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background:#f4f6fb; color:#1a1a2e; padding:40px 20px; }
+  .slip { max-width:680px; margin:0 auto; background:#fff; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,.1); overflow:hidden; }
+  .slip-header { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; padding:28px 32px; display:flex; justify-content:space-between; align-items:flex-end; }
+  .slip-brand { font-size:22px; font-weight:800; letter-spacing:-.5px; }
+  .slip-brand span { opacity:.7; }
+  .slip-period { font-size:13px; opacity:.8; text-align:right; }
+  .slip-period strong { display:block; font-size:18px; font-weight:700; opacity:1; }
+  .slip-body { padding:28px 32px; }
+  .slip-section { margin-bottom:22px; }
+  .slip-section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#6366f1; margin-bottom:10px; border-bottom:1px solid #e8eaf6; padding-bottom:6px; }
+  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 24px; }
+  .info-item label { display:block; font-size:11px; color:#888; font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px; }
+  .info-item span { font-size:14px; font-weight:600; color:#1a1a2e; }
+  .salary-table { width:100%; border-collapse:collapse; }
+  .salary-table th { font-size:11px; font-weight:700; text-transform:uppercase; color:#888; padding:6px 0 8px; border-bottom:2px solid #e8eaf6; text-align:left; }
+  .salary-table th:not(:first-child) { text-align:right; }
+  .salary-table tr td { padding:9px 0; border-bottom:1px solid #f0f0f5; font-size:14px; }
+  .salary-table tr td:not(:first-child) { text-align:right; font-weight:600; }
+  .salary-table .total-row td { font-size:16px; font-weight:800; color:#6366f1; border-top:2px solid #6366f1; border-bottom:none; padding-top:12px; }
+  .totals-row td { font-weight:800; font-size:15px; color:#1a1a2e; border-top:2px solid #6366f1; padding-top:10px; border-bottom:none; }
+  .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+  .status-paid { background:#d1fae5; color:#065f46; }
+  .status-pending { background:#fef3c7; color:#92400e; }
+  .slip-footer { background:#f8f9ff; padding:16px 32px; font-size:11px; color:#999; border-top:1px solid #e8eaf6; display:flex; justify-content:space-between; }
+  @media print { body { background:#fff; padding:0; } .slip { box-shadow:none; border-radius:0; } }
+</style>
+</head><body>
+<div class="slip">
+  <div class="slip-header">
+    <div class="slip-brand">Work<span>Buddy</span></div>
+    <div class="slip-period">Salary Slip<strong>${period}</strong></div>
+  </div>
+  <div class="slip-body">
+    <div class="slip-section">
+      <div class="slip-section-title">Employee Details</div>
+      <div class="info-grid">
+        <div class="info-item"><label>Name</label><span>${emp.employeeName||'—'}</span></div>
+        <div class="info-item"><label>Employee ID</label><span>${emp.employeeId||'—'}</span></div>
+        ${!isMulti ? `
+        <div class="info-item"><label>Pay Period</label><span>${emp.month} ${emp.year}</span></div>
+        <div class="info-item"><label>Status</label><span class="status-badge ${emp.status==='Paid'?'status-paid':'status-pending'}">${emp.status||'—'}</span></div>` : `
+        <div class="info-item"><label>Year</label><span>${emp.year}</span></div>
+        <div class="info-item"><label>Months</label><span>${records.length} month(s)</span></div>`}
+      </div>
+    </div>
+    <div class="slip-section">
+      <div class="slip-section-title">Salary Breakdown</div>
+      <table class="salary-table">
+        ${isMulti ? `<thead><tr><th>Month</th><th style="text-align:right">Basic</th><th style="text-align:right">Bonus</th><th style="text-align:right">Deductions</th><th style="text-align:right">Net Salary</th><th style="text-align:right">Status</th></tr></thead><tbody>
+        ${monthRows}
+        <tr class="totals-row">
+          <td>Total</td><td>${fmt(totalBasic)}</td><td>+${fmt(totalBonus)}</td><td>−${fmt(totalDeduct)}</td><td>${fmt(totalNet)}</td><td></td>
+        </tr></tbody>` : `<tbody>${singleRows}</tbody>`}
+      </table>
+    </div>
+  </div>
+  <div class="slip-footer">
+    <span>Generated on ${now}</span>
+    <span>WorkBuddy HR Portal</span>
+  </div>
+</div>
+<script>window.onload = () => window.print();<\/script>
+</body></html>`;
+        const w = window.open('', '_blank');
+        w.document.write(html);
+        w.document.close();
+    }
+
+    /* ── Helpers ── */
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function showToast(type, msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast show ' + type;
+        setTimeout(() => t.className = 'toast', 3000);
+    }
+
+    document.getElementById('payroll-modal').addEventListener('click',  e => { if (e.target === e.currentTarget) closeModal(); });
+    document.getElementById('delete-modal').addEventListener('click',   e => { if (e.target === e.currentTarget) closeDeleteModal(); });
+    document.getElementById('download-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeDownloadModal(); });
+    </script>
+</body>
+</html>

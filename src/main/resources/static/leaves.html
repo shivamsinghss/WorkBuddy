@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WorkBuddy &mdash; Leave &amp; Attendance</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <style>
+        /* ── Balance Cards ── */
+        .balance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .balance-card {
+            background: #1e1e2e;
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 14px;
+            padding: 20px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .bc-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.45);
+        }
+        .bc-value {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .bc-sub { font-size: 12px; color: rgba(255,255,255,0.45); }
+        .bc-wfh   .bc-value { color: #818cf8; }
+        .bc-leave .bc-value { color: #34d399; }
+        .bc-present .bc-value { color: #f59e0b; }
+
+        /* ── Today Card ── */
+        .today-card {
+            background: #1e1e2e;
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 14px;
+            padding: 22px 24px;
+            margin-bottom: 24px;
+        }
+        .today-card h3 {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: rgba(255,255,255,0.45);
+            margin: 0 0 16px;
+        }
+        /* Radio-style option row */
+        .today-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .today-opt {
+            flex: 1;
+            min-width: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 12px 12px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            cursor: pointer;
+            transition: all .18s;
+            user-select: none;
+        }
+        .today-opt:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+        .today-opt .opt-icon { font-size: 22px; line-height: 1; }
+        .today-opt .opt-label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); }
+        /* Active states per type */
+        .today-opt.sel-present { border-color:#34d399; background:rgba(52,211,153,0.1); }
+        .today-opt.sel-present .opt-label { color:#34d399; }
+        .today-opt.sel-wfh     { border-color:#818cf8; background:rgba(129,140,248,0.1); }
+        .today-opt.sel-wfh     .opt-label { color:#818cf8; }
+        .today-opt.sel-leave   { border-color:#fbbf24; background:rgba(251,191,36,0.1); }
+        .today-opt.sel-leave   .opt-label { color:#fbbf24; }
+        .today-opt.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        /* Punch controls — only shown when Present is active */
+        .punch-controls {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+        }
+        .punch-controls.visible { display: flex; }
+        .btn-punch {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .18s;
+        }
+        .btn-punch-in  { background:rgba(52,211,153,0.2); color:#34d399; }
+        .btn-punch-in:hover  { background:rgba(52,211,153,0.35); }
+        .btn-punch-out { background:rgba(239,68,68,0.18); color:#ef4444; }
+        .btn-punch-out:hover { background:rgba(239,68,68,0.3); }
+        .btn-punch:disabled { opacity:.35; cursor:not-allowed; }
+        .punch-time { font-size:12px; color:rgba(255,255,255,0.45); }
+
+        /* ── Main Tabs ── */
+        .tabs-bar {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.45);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all .18s;
+        }
+        .tab-btn:hover { color: rgba(255,255,255,0.75); }
+        .tab-btn.active { color: #818cf8; border-bottom-color: #818cf8; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── Sub-filter Pills (All Requests tab) ── */
+        .filter-pills {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .pill {
+            padding: 5px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            transition: all .18s;
+        }
+        .pill:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.8); }
+        .pill.active { background: rgba(129,140,248,0.18); border-color: #818cf8; color: #818cf8; }
+
+        /* ── Apply Sub-options ── */
+        .apply-options {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .apply-option-card {
+            flex: 1;
+            min-width: 200px;
+            max-width: 260px;
+            background: #1e1e2e;
+            border: 2px solid rgba(99,102,241,0.2);
+            border-radius: 14px;
+            padding: 22px 20px;
+            cursor: pointer;
+            transition: all .2s;
+            text-align: center;
+        }
+        .apply-option-card:hover { border-color: rgba(129,140,248,0.5); background: rgba(129,140,248,0.06); }
+        .apply-option-card.selected { border-color: #818cf8; background: rgba(129,140,248,0.12); }
+        .apply-option-card .aoc-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .apply-option-card .aoc-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .apply-option-card .aoc-desc {
+            font-size: 12px;
+            color: rgba(255,255,255,0.45);
+        }
+
+        /* ── Apply Form ── */
+        .apply-form-wrap {
+            background: #1e1e2e;
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 14px;
+            padding: 24px;
+            max-width: 560px;
+            display: none;
+        }
+        .apply-form-wrap.visible { display: block; }
+        .apply-form-wrap h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin: 0 0 20px;
+        }
+        .lf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .lf-full { grid-column: 1 / -1; }
+
+        /* ── Admin bar ── */
+        .admin-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .admin-bar h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin: 0;
+        }
+
+        /* ── Credits modal ── */
+        .credits-form { display: flex; flex-direction: column; gap: 14px; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== Navbar ===== -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="navbar-brand">
+            <div class="logo-icon">W</div>
+            <span class="brand-name">Work<span>Buddy</span></span>
+        </a>
+        <div class="navbar-actions">
+            <a href="services.html" class="nav-services-link" style="color:#fff;background:rgba(99,102,241,0.2);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                </svg>
+                Services
+            </a>
+            <button class="btn-signin" id="btn-signin" onclick="openSignInModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H3" /></svg>
+                Sign In
+            </button>
+            <div class="profile-wrapper" id="profile-section" style="display:none;">
+                <button class="profile-btn" id="profile-btn">
+                    <div class="profile-avatar" id="nav-avatar">??</div>
+                    <span class="profile-name" id="nav-name">Loading</span>
+                    <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                </button>
+                <div class="profile-dropdown" id="profile-dropdown">
+                    <div class="profile-dropdown-header">
+                        <div class="full-name" id="nav-full-name">-</div>
+                        <div class="email" id="nav-email">-</div>
+                    </div>
+                    <a href="employees.html"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg> My Profile</a>
+                    <div class="divider"></div>
+                    <a href="#" class="logout" onclick="signOut(); return false;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg> Sign Out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== Page Content ===== -->
+    <div class="page-content">
+        <div class="page-inner">
+
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Leave &amp; Attendance</h1>
+                    <p class="page-subtitle">Track your attendance, manage leave and WFH requests</p>
+                </div>
+                <div id="admin-credits-btn" style="display:none;">
+                    <button class="btn-add" onclick="openCreditsModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Add Credits
+                    </button>
+                </div>
+            </div>
+
+            <!-- Balance Cards -->
+            <div class="balance-grid">
+                <div class="balance-card bc-wfh">
+                    <div class="bc-label">WFH Credits</div>
+                    <div class="bc-value" id="bc-wfh-rem">—</div>
+                    <div class="bc-sub" id="bc-wfh-sub">of 10 remaining this month</div>
+                </div>
+                <div class="balance-card bc-leave">
+                    <div class="bc-label">Leave Credits</div>
+                    <div class="bc-value" id="bc-leave-rem">—</div>
+                    <div class="bc-sub" id="bc-leave-sub">of 5 remaining this month</div>
+                </div>
+                <div class="balance-card bc-present">
+                    <div class="bc-label">Days Present</div>
+                    <div class="bc-value" id="bc-present">—</div>
+                    <div class="bc-sub">this month</div>
+                </div>
+            </div>
+
+            <!-- Today's Card (employees only) -->
+            <div class="today-card" id="today-card">
+                <h3>Today &mdash; <span id="today-date"></span></h3>
+
+                <!-- Pick exactly one -->
+                <div class="today-options">
+                    <div class="today-opt" id="opt-present" onclick="selectToday('Present')">
+                        <span class="opt-icon">🏢</span>
+                        <span class="opt-label">Office</span>
+                    </div>
+                    <div class="today-opt" id="opt-wfh-today" onclick="selectToday('WFH')">
+                        <span class="opt-icon">🏠</span>
+                        <span class="opt-label">WFH</span>
+                    </div>
+                    <div class="today-opt" id="opt-leave-today" onclick="selectToday('Leave')">
+                        <span class="opt-icon">📅</span>
+                        <span class="opt-label">On Leave</span>
+                    </div>
+                </div>
+
+                <!-- Punch In/Out — only shown when Office is selected -->
+                <div class="punch-controls" id="punch-controls">
+                    <button class="btn-punch btn-punch-in"  id="btn-punch-in"  onclick="doPunchIn()">Punch In</button>
+                    <button class="btn-punch btn-punch-out" id="btn-punch-out" onclick="doPunchOut()">Punch Out</button>
+                    <span class="punch-time" id="punch-times"></span>
+                </div>
+            </div>
+
+            <!-- ── Main Tabs ── -->
+            <div class="tabs-bar">
+                <button class="tab-btn active" onclick="switchTab('history', this)">Attendance History</button>
+                <button class="tab-btn"        onclick="switchTab('requests', this)">All Requests</button>
+                <button class="tab-btn"        onclick="switchTab('apply', this)">Apply</button>
+            </div>
+
+            <!-- ══ Tab: Attendance History ══ -->
+            <div class="tab-panel active" id="tab-history">
+                <div id="admin-att-bar" class="admin-bar" style="display:none;">
+                    <h3>All Employees &mdash; Today</h3>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th id="att-name-col" style="display:none;">Employee</th>
+                                <th>Type</th>
+                                <th>Punch In</th>
+                                <th>Punch Out</th>
+                                <th>Hours</th>
+                            </tr>
+                        </thead>
+                        <tbody id="att-tbody">
+                            <tr class="loading-row"><td colspan="6">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ══ Tab: All Requests ══ -->
+            <div class="tab-panel" id="tab-requests">
+                <!-- Sub-filter pills -->
+                <div class="filter-pills">
+                    <button class="pill active" onclick="filterRequests('all',  this)">All</button>
+                    <button class="pill"        onclick="filterRequests('leave', this)">Leave</button>
+                    <button class="pill"        onclick="filterRequests('wfh',   this)">WFH</button>
+                </div>
+
+                <div id="req-admin-bar" class="admin-bar" style="display:none;">
+                    <h3 id="req-admin-title">All Requests</h3>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th id="req-name-col" style="display:none;">Employee</th>
+                                <th>Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="req-tbody">
+                            <tr class="loading-row"><td colspan="7">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ══ Tab: Apply ══ -->
+            <div class="tab-panel" id="tab-apply">
+
+                <!-- Sub-option cards — pick exactly one -->
+                <div class="apply-options">
+                    <div class="apply-option-card" id="opt-leave" onclick="selectApplyOption('leave')">
+                        <div class="aoc-icon">🏖️</div>
+                        <div class="aoc-title">Leave</div>
+                        <div class="aoc-desc">Sick, casual or earned leave<br>Deducts from leave credits</div>
+                    </div>
+                    <div class="apply-option-card" id="opt-wfh" onclick="selectApplyOption('wfh')">
+                        <div class="aoc-icon">🏠</div>
+                        <div class="aoc-title">WFH</div>
+                        <div class="aoc-desc">Work from home request<br>No credit deduction</div>
+                    </div>
+                    <div class="apply-option-card" id="opt-compoff" onclick="selectApplyOption('compoff')">
+                        <div class="aoc-icon">🔄</div>
+                        <div class="aoc-title">Comp Off</div>
+                        <div class="aoc-desc">Compensatory day off<br>No credit deduction</div>
+                    </div>
+                </div>
+
+                <!-- Leave form -->
+                <div class="apply-form-wrap" id="form-leave">
+                    <h3>Leave Request</h3>
+                    <form id="leave-form" onsubmit="submitRequest(event, 'leave')">
+                        <div class="lf-row">
+                            <div class="form-group">
+                                <label class="form-label">Leave Type</label>
+                                <select id="lf-type" class="form-select" required>
+                                    <option value="">Select type</option>
+                                    <option>Sick Leave</option>
+                                    <option>Casual Leave</option>
+                                    <option>Earned Leave</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Status</label>
+                                <input class="form-input" value="Pending" disabled />
+                            </div>
+                        </div>
+                        <div class="lf-row">
+                            <div class="form-group">
+                                <label class="form-label">Start Date</label>
+                                <input id="lf-from" type="date" class="form-input" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">End Date</label>
+                                <input id="lf-to" type="date" class="form-input" required />
+                            </div>
+                        </div>
+                        <div class="form-group lf-full">
+                            <label class="form-label">Reason</label>
+                            <textarea id="lf-reason" class="form-textarea" rows="3" placeholder="Brief reason for leave…" required></textarea>
+                        </div>
+                        <div style="margin-top:6px;">
+                            <button type="submit" class="btn-save" style="padding:10px 28px;font-size:13px;">Submit Leave Request</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- WFH form -->
+                <div class="apply-form-wrap" id="form-wfh">
+                    <h3>WFH Request</h3>
+                    <form id="wfh-form" onsubmit="submitRequest(event, 'wfh')">
+                        <div class="lf-row">
+                            <div class="form-group">
+                                <label class="form-label">Date</label>
+                                <input id="wf-date" type="date" class="form-input" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Status</label>
+                                <input class="form-input" value="Pending" disabled />
+                            </div>
+                        </div>
+                        <div class="form-group lf-full">
+                            <label class="form-label">Reason <span style="color:rgba(255,255,255,0.3)">(optional)</span></label>
+                            <textarea id="wf-reason" class="form-textarea" rows="3" placeholder="Reason for working from home…"></textarea>
+                        </div>
+                        <div style="margin-top:6px;">
+                            <button type="submit" class="btn-save" style="padding:10px 28px;font-size:13px;">Submit WFH Request</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Comp Off form -->
+                <div class="apply-form-wrap" id="form-compoff">
+                    <h3>Comp Off Request</h3>
+                    <form id="compoff-form" onsubmit="submitRequest(event, 'compoff')">
+                        <div class="lf-row">
+                            <div class="form-group">
+                                <label class="form-label">Comp Off Date</label>
+                                <input id="co-date" type="date" class="form-input" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Worked On</label>
+                                <input id="co-worked" type="date" class="form-input" required />
+                            </div>
+                        </div>
+                        <div class="form-group lf-full">
+                            <label class="form-label">Reason</label>
+                            <textarea id="co-reason" class="form-textarea" rows="3" placeholder="e.g. Worked on Sunday 2nd March for project deadline…" required></textarea>
+                        </div>
+                        <div style="margin-top:6px;">
+                            <button type="submit" class="btn-save" style="padding:10px 28px;font-size:13px;">Submit Comp Off Request</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div><!-- /tab-apply -->
+
+        </div>
+    </div>
+
+    <!-- ===== Add Credits Modal (admin) ===== -->
+    <div class="dash-modal-overlay" id="credits-modal" style="display:none;" onclick="closeCreditsModal(event)">
+        <div class="dash-modal-card" style="max-width:400px;" onclick="event.stopPropagation()">
+            <h2 class="modal-title">Add Leave Credits</h2>
+            <div class="credits-form">
+                <div class="form-group">
+                    <label class="form-label">Target Employee</label>
+                    <select id="cr-emp" class="form-select">
+                        <option value="all">All Employees</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">WFH Credits</label>
+                        <input id="cr-wfh" type="number" class="form-input" value="10" min="0" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Leave Credits</label>
+                        <input id="cr-leave" type="number" class="form-input" value="5" min="0" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeCreditsModal()">Cancel</button>
+                <button class="btn-save"   onclick="doAddCredits()">Add Credits</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Delete Confirm Modal ===== -->
+    <div class="dash-modal-overlay" id="delete-modal" style="display:none;" onclick="closeDeleteModal(event)">
+        <div class="dash-modal-card confirm-card" onclick="event.stopPropagation()">
+            <div class="confirm-icon">🗑️</div>
+            <h2 class="modal-title">Delete Request?</h2>
+            <p style="color:rgba(255,255,255,0.5);font-size:14px;margin:0 0 20px;">This action cannot be undone.</p>
+            <div class="modal-footer">
+                <button class="btn-cancel"        onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn-confirm-delete" onclick="doDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Toast ===== -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ===== Auth Modal ===== -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="auth-modal-card">
+            <button class="modal-close" onclick="closeSignInModal()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg></button>
+            <div id="step-provider" class="modal-step">
+                <div class="modal-logo"><div class="logo-icon" style="width:38px;height:38px;font-size:17px;">W</div><span class="brand-name" style="font-size:18px;">Work<span>Buddy</span></span></div>
+                <h2 class="modal-title">Sign in to WorkBuddy</h2><p class="modal-subtitle">Choose how you'd like to continue</p>
+                <button class="provider-btn" onclick="showEmailStep()"><span class="provider-icon email"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg></span>Continue with Email</button>
+            </div>
+            <div id="step-loading" class="modal-step" style="display:none;"><div class="modal-loading"><div class="spinner"></div><p id="loading-text">Connecting...</p></div></div>
+            <div id="step-email" class="modal-step" style="display:none;">
+                <button class="modal-back" onclick="showProviderStep()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg> Back</button>
+                <h2 class="modal-title">Sign in</h2><p class="modal-subtitle">Use your WorkBuddy credentials</p>
+                <div class="modal-form-group"><label class="modal-label">Username or Email</label><input type="text" id="email-username" class="modal-input" /></div>
+                <div class="modal-form-group"><label class="modal-label">Password</label><input type="password" id="email-password" class="modal-input" /></div>
+                <button class="modal-submit" onclick="submitEmailSignIn()">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+    /* ─── State ─── */
+    const user    = getUser();
+    const isAdmin = user && user.role === 'admin';
+    let todayRecord    = null;
+    let allRequests    = [];
+    let activeReqFilter = 'all';
+    let deleteReqId    = null;
+
+    /* ─── Init ─── */
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!user) { window.location.href = 'index.html'; return; }
+        initNavAuth();
+
+        window.addEventListener('scroll', () =>
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20));
+
+        document.getElementById('today-date').textContent =
+            new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+        // Pre-fill WFH date to today
+        document.getElementById('wf-date').value = new Date().toISOString().slice(0, 10);
+
+        if (isAdmin) {
+            document.getElementById('admin-credits-btn').style.display = 'block';
+            document.getElementById('admin-att-bar').style.display     = 'flex';
+            document.getElementById('req-admin-bar').style.display     = 'flex';
+            document.getElementById('att-name-col').style.display      = '';
+            document.getElementById('req-name-col').style.display      = '';
+            document.getElementById('today-card').style.display        = 'none';
+            loadAdminData();
+        } else {
+            loadEmployeeData();
+        }
+
+        loadRequests();
+        loadCreditsEmployeeList();
+    });
+
+    /* ──────────────────────────────────────────
+       ATTENDANCE
+    ────────────────────────────────────────── */
+    async function loadEmployeeData() {
+        try {
+            const [today, history, balance] = await Promise.all([
+                Api.attendance.getToday(user.id),
+                Api.attendance.getHistory(user.id),
+                Api.attendance.getBalance(user.id, user.name)
+            ]);
+            todayRecord = today;
+            updateTodayUI(today);
+            updateBalanceCards(balance, history);
+            renderHistory(history, false);
+        } catch (e) {
+            console.error(e);
+            showToast('Failed to load attendance data', 'error');
+        }
+    }
+
+    function updateTodayUI(rec) {
+        const opts = {
+            Present: document.getElementById('opt-present'),
+            WFH:     document.getElementById('opt-wfh-today'),
+            Leave:   document.getElementById('opt-leave-today')
+        };
+        const selClass = { Present:'sel-present', WFH:'sel-wfh', Leave:'sel-leave' };
+
+        // Reset
+        Object.values(opts).forEach(el => el.className = 'today-opt');
+        const punchControls = document.getElementById('punch-controls');
+
+        if (rec) {
+            const type = rec.type;
+            // Highlight selected
+            if (opts[type]) opts[type].classList.add(selClass[type]);
+            // Disable the other two
+            Object.entries(opts).forEach(([t, el]) => {
+                if (t !== type) el.classList.add('disabled');
+            });
+
+            if (type === 'Present') {
+                punchControls.classList.add('visible');
+            } else {
+                punchControls.classList.remove('visible');
+            }
+
+            document.getElementById('btn-punch-in').disabled  = !!rec.punchIn;
+            document.getElementById('btn-punch-out').disabled = !rec.punchIn || !!rec.punchOut;
+
+            let t = '';
+            if (rec.punchIn)  t += 'In: ' + rec.punchIn;
+            if (rec.punchOut) t += '   Out: ' + rec.punchOut;
+            document.getElementById('punch-times').textContent = t;
+        } else {
+            punchControls.classList.remove('visible');
+            document.getElementById('btn-punch-in').disabled  = false;
+            document.getElementById('btn-punch-out').disabled = true;
+            document.getElementById('punch-times').textContent = '';
+        }
+    }
+
+    /* ─── Select a today option (radio behaviour) ─── */
+    async function selectToday(type) {
+        // If already set to this type, do nothing
+        if (todayRecord && todayRecord.type === type) return;
+
+        // If switching to Office, show punch controls immediately then mark Present
+        if (type === 'Present') {
+            document.getElementById('punch-controls').classList.add('visible');
+        }
+
+        try {
+            const rec = await Api.attendance.mark({ employeeId: user.id, employeeName: user.name || '', type });
+            todayRecord = rec;
+            updateTodayUI(rec);
+            const [balance, history] = await Promise.all([
+                Api.attendance.getBalance(user.id, user.name),
+                Api.attendance.getHistory(user.id)
+            ]);
+            updateBalanceCards(balance, history);
+            renderHistory(history, false);
+            showToast('Marked as ' + (type === 'Present' ? 'Office / Present' : type));
+        } catch (e) {
+            showToast(e.message || 'Failed to mark attendance', 'error');
+        }
+    }
+
+    function updateBalanceCards(balance, history) {
+        if (balance) {
+            const wfhRem   = balance.wfhRemaining   ?? (balance.wfhCreditsTotal   - balance.wfhUsed);
+            const leaveRem = balance.leaveRemaining  ?? (balance.leaveCreditsTotal - balance.leaveUsed);
+            document.getElementById('bc-wfh-rem').textContent   = wfhRem;
+            document.getElementById('bc-leave-rem').textContent = leaveRem;
+            document.getElementById('bc-wfh-sub').textContent   = 'of ' + balance.wfhCreditsTotal   + ' remaining this month';
+            document.getElementById('bc-leave-sub').textContent = 'of ' + balance.leaveCreditsTotal + ' remaining this month';
+        }
+        if (history) {
+            const now = new Date();
+            const count = history.filter(r =>
+                r.month === (now.getMonth() + 1) && r.year === now.getFullYear() &&
+                (r.type === 'Present' || r.type === 'WFH')
+            ).length;
+            document.getElementById('bc-present').textContent = count;
+        }
+    }
+
+    async function loadAdminData() {
+        try {
+            const allToday = await Api.attendance.getAllToday();
+            renderHistory(allToday, true);
+            document.getElementById('bc-wfh-rem').textContent   = allToday.filter(r => r.type === 'WFH').length;
+            document.getElementById('bc-leave-rem').textContent = '—';
+            document.getElementById('bc-present').textContent   = allToday.filter(r => r.type === 'Present' || r.type === 'WFH').length;
+            document.getElementById('bc-wfh-sub').textContent   = 'employees on WFH today';
+            document.getElementById('bc-leave-sub').textContent = 'leave requests pending';
+        } catch (e) { console.error(e); }
+    }
+
+    function renderHistory(records, showName) {
+        const tbody = document.getElementById('att-tbody');
+        if (!records || !records.length) {
+            tbody.innerHTML = `<tr class="empty-state"><td colspan="6">No attendance records found</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = records.map(r => `<tr>
+            <td>${r.date || '—'}</td>
+            ${showName ? `<td>${r.employeeName || r.employeeId}</td>` : ''}
+            <td>${badgeType(r.type)}</td>
+            <td>${r.punchIn  || '—'}</td>
+            <td>${r.punchOut || '—'}</td>
+            <td>${calcHours(r.punchIn, r.punchOut)}</td>
+        </tr>`).join('');
+    }
+
+    function calcHours(pIn, pOut) {
+        if (!pIn || !pOut) return '—';
+        try {
+            const [hi, mi] = pIn.split(':').map(Number);
+            const [ho, mo] = pOut.split(':').map(Number);
+            const m = (ho*60+mo) - (hi*60+mi);
+            return m > 0 ? Math.floor(m/60) + 'h ' + (m%60) + 'm' : '—';
+        } catch { return '—'; }
+    }
+
+    /* ─── Punch In — auto-selects Office if not already set ─── */
+    async function doPunchIn() {
+        try {
+            const rec = await Api.attendance.punchIn({ employeeId: user.id, employeeName: user.name || '' });
+            todayRecord = rec;
+            updateTodayUI(rec);
+            const history = await Api.attendance.getHistory(user.id);
+            renderHistory(history, false);
+            showToast('Punched in at ' + rec.punchIn);
+        } catch (e) { showToast('Punch in failed', 'error'); }
+    }
+
+    async function doPunchOut() {
+        try {
+            const rec = await Api.attendance.punchOut({ employeeId: user.id });
+            if (rec) {
+                todayRecord = rec;
+                updateTodayUI(rec);
+                const history = await Api.attendance.getHistory(user.id);
+                renderHistory(history, false);
+                showToast('Punched out at ' + rec.punchOut);
+            }
+        } catch (e) { showToast('Punch out failed', 'error'); }
+    }
+
+    /* ─── WFH / Leave override ─── */
+    async function markAttendance(type) {
+        try {
+            const rec = await Api.attendance.mark({ employeeId: user.id, employeeName: user.name || '', type });
+            todayRecord = rec;
+            updateTodayUI(rec);
+            const [balance, history] = await Promise.all([
+                Api.attendance.getBalance(user.id, user.name),
+                Api.attendance.getHistory(user.id)
+            ]);
+            updateBalanceCards(balance, history);
+            renderHistory(history, false);
+            showToast('Status set to ' + type);
+        } catch (e) {
+            showToast(e.message || 'Failed to mark attendance', 'error');
+        }
+    }
+
+    /* ──────────────────────────────────────────
+       ALL REQUESTS
+    ────────────────────────────────────────── */
+    async function loadRequests() {
+        try {
+            allRequests = (await Api.leaves.getAll()) || [];
+            renderRequests();
+        } catch (e) {
+            document.getElementById('req-tbody').innerHTML =
+                `<tr class="empty-state"><td colspan="7">Failed to load requests</td></tr>`;
+        }
+    }
+
+    function filterRequests(filter, btn) {
+        activeReqFilter = filter;
+        document.querySelectorAll('.filter-pills .pill').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const titles = { all:'All Requests', leave:'Leave Requests', wfh:'WFH Requests' };
+        const el = document.getElementById('req-admin-title');
+        if (el) el.textContent = titles[filter] || 'All Requests';
+        renderRequests();
+    }
+
+    function renderRequests() {
+        const tbody = document.getElementById('req-tbody');
+        let visible = isAdmin ? allRequests : allRequests.filter(l => l.employeeId === user.id);
+
+        if (activeReqFilter === 'wfh')
+            visible = visible.filter(l => (l.type||'').toUpperCase() === 'WFH');
+        else if (activeReqFilter === 'leave')
+            visible = visible.filter(l => (l.type||'').toUpperCase() !== 'WFH');
+
+        if (!visible.length) {
+            tbody.innerHTML = `<tr class="empty-state"><td colspan="7">No requests found</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = visible.map(l => `<tr>
+            ${isAdmin ? `<td>${l.employeeName || l.employeeId}</td>` : ''}
+            <td>${reqTypeBadge(l.type)}</td>
+            <td>${l.startDate || '—'}</td>
+            <td>${l.endDate   || '—'}</td>
+            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                title="${(l.reason||'').replace(/"/g,'&quot;')}">${l.reason || '—'}</td>
+            <td>${badgeStatus(l.status)}</td>
+            <td>${reqActions(l)}</td>
+        </tr>`).join('');
+    }
+
+    function reqTypeBadge(type) {
+        if (!type) return '<span class="badge badge-gray">—</span>';
+        const isWfh = type.toUpperCase() === 'WFH';
+        return `<span class="badge ${isWfh ? 'badge-blue' : 'badge-yellow'}">${type}</span>`;
+    }
+    function badgeStatus(s) {
+        const map = { Approved:'badge-green', Rejected:'badge-red', Pending:'badge-yellow' };
+        return `<span class="badge ${map[s] || 'badge-gray'}">${s || 'Pending'}</span>`;
+    }
+    function reqActions(l) {
+        let html = '';
+        if (isAdmin && l.status === 'Pending') {
+            html += `<button class="btn-icon success" title="Approve" onclick="approveReq('${l.id}')">✓</button> `;
+            html += `<button class="btn-icon danger"  title="Reject"  onclick="rejectReq('${l.id}')">✗</button> `;
+        }
+        if (isAdmin || l.status === 'Pending')
+            html += `<button class="btn-icon danger" title="Delete" onclick="confirmDelete('${l.id}')">🗑</button>`;
+        return html || '—';
+    }
+
+    async function approveReq(id) {
+        try { await Api.leaves.approve(id); await loadRequests(); showToast('Request approved'); }
+        catch (e) { showToast('Failed to approve', 'error'); }
+    }
+    async function rejectReq(id) {
+        try { await Api.leaves.reject(id); await loadRequests(); showToast('Request rejected'); }
+        catch (e) { showToast('Failed to reject', 'error'); }
+    }
+    function confirmDelete(id) {
+        deleteReqId = id;
+        document.getElementById('delete-modal').style.display = 'flex';
+    }
+    function closeDeleteModal(e) {
+        if (!e || e.target === document.getElementById('delete-modal')) {
+            document.getElementById('delete-modal').style.display = 'none';
+            deleteReqId = null;
+        }
+    }
+    async function doDelete() {
+        if (!deleteReqId) return;
+        try {
+            await Api.leaves.delete(deleteReqId);
+            closeDeleteModal();
+            await loadRequests();
+            showToast('Request deleted');
+        } catch (e) { showToast('Delete failed', 'error'); }
+    }
+
+    /* ──────────────────────────────────────────
+       APPLY
+    ────────────────────────────────────────── */
+    function selectApplyOption(type) {
+        ['leave','wfh','compoff'].forEach(k => {
+            document.getElementById('opt-'  + k).classList.toggle('selected', k === type);
+            document.getElementById('form-' + k).classList.toggle('visible',  k === type);
+        });
+    }
+
+    async function submitRequest(e, kind) {
+        e.preventDefault();
+        let data;
+        if (kind === 'leave') {
+            const from = document.getElementById('lf-from').value;
+            const to   = document.getElementById('lf-to').value;
+            const days = Math.max(1, Math.round((new Date(to) - new Date(from)) / 86400000) + 1);
+            data = {
+                employeeId:  user.id, employeeName: user.name || '',
+                type:        document.getElementById('lf-type').value,
+                startDate:   from, endDate: to, days,
+                reason:      document.getElementById('lf-reason').value,
+                status:      'Pending',
+                appliedDate: new Date().toISOString().slice(0,10)
+            };
+        } else if (kind === 'wfh') {
+            const date = document.getElementById('wf-date').value;
+            data = {
+                employeeId:  user.id, employeeName: user.name || '',
+                type:        'WFH',
+                startDate:   date, endDate: date, days: 1,
+                reason:      document.getElementById('wf-reason').value,
+                status:      'Pending',
+                appliedDate: new Date().toISOString().slice(0,10)
+            };
+        } else {
+            // compoff
+            const date   = document.getElementById('co-date').value;
+            const worked = document.getElementById('co-worked').value;
+            data = {
+                employeeId:  user.id, employeeName: user.name || '',
+                type:        'Comp Off',
+                startDate:   date, endDate: date, days: 1,
+                reason:      'Worked on ' + worked + '. ' + document.getElementById('co-reason').value,
+                status:      'Pending',
+                appliedDate: new Date().toISOString().slice(0,10)
+            };
+        }
+
+        try {
+            await Api.leaves.submit(data);
+            document.getElementById({ leave:'leave-form', wfh:'wfh-form', compoff:'compoff-form' }[kind]).reset();
+            if (kind === 'wfh') document.getElementById('wf-date').value = new Date().toISOString().slice(0,10);
+            await loadRequests();
+            if (kind === 'leave') {
+                const [balance, history] = await Promise.all([
+                    Api.attendance.getBalance(user.id, user.name),
+                    Api.attendance.getHistory(user.id)
+                ]);
+                updateBalanceCards(balance, history);
+            }
+            const reqBtn  = document.querySelectorAll('.tab-btn')[1];
+            const pillBtn = document.querySelectorAll('.filter-pills .pill')[kind === 'wfh' ? 2 : 1];
+            switchTab('requests', reqBtn);
+            filterRequests(kind === 'wfh' ? 'wfh' : 'leave', pillBtn);
+            showToast({ leave:'Leave', wfh:'WFH', compoff:'Comp Off' }[kind] + ' request submitted');
+        } catch (e) {
+            showToast(e.message || 'Failed to submit', 'error');
+        }
+    }
+
+    /* ──────────────────────────────────────────
+       CREDITS MODAL
+    ────────────────────────────────────────── */
+    async function loadCreditsEmployeeList() {
+        if (!isAdmin) return;
+        try {
+            const emps = (await Api.employees.getAll()) || [];
+            const sel  = document.getElementById('cr-emp');
+            emps.forEach(emp => {
+                const opt = document.createElement('option');
+                opt.value = emp.id;
+                opt.textContent = (emp.firstName||'') + ' ' + (emp.lastName||'') + ' (' + emp.id + ')';
+                sel.appendChild(opt);
+            });
+        } catch (e) { /* ignore */ }
+    }
+    function openCreditsModal()   { document.getElementById('credits-modal').style.display = 'flex'; }
+    function closeCreditsModal(e) {
+        if (!e || e.target === document.getElementById('credits-modal'))
+            document.getElementById('credits-modal').style.display = 'none';
+    }
+    async function doAddCredits() {
+        const empId = document.getElementById('cr-emp').value;
+        const wfh   = parseInt(document.getElementById('cr-wfh').value)   || 0;
+        const leave = parseInt(document.getElementById('cr-leave').value) || 0;
+        try {
+            await Api.attendance.addCredits({ employeeId: empId, wfhCredits: wfh, leaveCredits: leave });
+            closeCreditsModal();
+            showToast('Credits added successfully');
+        } catch (e) { showToast('Failed to add credits', 'error'); }
+    }
+
+    /* ──────────────────────────────────────────
+       HELPERS
+    ────────────────────────────────────────── */
+    function switchTab(name, btn) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        if (btn) btn.classList.add('active');
+    }
+
+    function badgeType(type) {
+        const map = { Present:'badge-green', WFH:'badge-blue', Leave:'badge-yellow', Absent:'badge-red' };
+        return `<span class="badge ${map[type] || 'badge-gray'}">${type || '—'}</span>`;
+    }
+
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast show ' + (type === 'error' ? 'error' : 'success');
+        setTimeout(() => t.className = 'toast', 3000);
+    }
+    </script>
+</body>
+</html>

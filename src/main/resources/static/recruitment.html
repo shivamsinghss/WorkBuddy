@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WorkBuddy &mdash; Recruitment</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+
+    <!-- ===== Fixed Navbar ===== -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="navbar-brand">
+            <div class="logo-icon">W</div>
+            <span class="brand-name">Work<span>Buddy</span></span>
+        </a>
+        <div class="navbar-actions">
+            <a href="services.html" class="nav-services-link" style="color:#fff;background:rgba(99,102,241,0.2);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" /></svg>
+                Services
+            </a>
+            <button class="btn-signin" id="btn-signin" onclick="openSignInModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H3" /></svg>
+                Sign In
+            </button>
+            <div class="profile-wrapper" id="profile-section" style="display:none;">
+                <button class="profile-btn" id="profile-btn">
+                    <div class="profile-avatar" id="nav-avatar">??</div>
+                    <span class="profile-name" id="nav-name">Loading</span>
+                    <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                </button>
+                <div class="profile-dropdown" id="profile-dropdown">
+                    <div class="profile-dropdown-header">
+                        <div class="full-name" id="nav-full-name">-</div>
+                        <div class="email" id="nav-email">-</div>
+                    </div>
+                    <a href="#"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg> My Profile</a>
+                    <div class="divider"></div>
+                    <a href="#" class="logout" onclick="signOut(); return false;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg> Sign Out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== Page Content ===== -->
+    <div class="page-content">
+        <div class="page-inner">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <div class="page-title">Recruitment</div>
+                    <div class="page-subtitle">Manage job postings and the hiring pipeline</div>
+                </div>
+                <button class="btn-add" id="btn-post-job" onclick="openAddModal()" style="display:none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    Post Job
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Department</th>
+                            <th>Location</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Posted Date</th>
+                            <th>Closing Date</th>
+                            <th id="th-actions" style="display:none;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recruitment-tbody">
+                        <tr class="loading-row">
+                            <td colspan="8">Loading job postings...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== Footer ===== -->
+    <footer class="footer"><span>&copy; 2026 WorkBuddy. All rights reserved.</span></footer>
+
+    <!-- ===== Add / Edit Modal ===== -->
+    <div class="dash-modal-overlay" id="form-modal">
+        <div class="dash-modal-card">
+            <button class="dash-modal-close" onclick="closeFormModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+            </button>
+            <div class="dash-modal-title" id="form-modal-title">Post Job</div>
+
+            <!-- Title -->
+            <div class="form-group">
+                <label class="form-label">Title</label>
+                <input type="text" id="f-title" class="form-input" placeholder="e.g. Senior Software Engineer" />
+            </div>
+
+            <!-- Department + Location -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <input type="text" id="f-department" class="form-input" placeholder="e.g. Engineering" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" id="f-location" class="form-input" placeholder="e.g. Remote / New York" />
+                </div>
+            </div>
+
+            <!-- Type + Status (status only shown on edit) -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select id="f-type" class="form-select">
+                        <option value="Full-Time">Full-Time</option>
+                        <option value="Part-Time">Part-Time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Internship">Internship</option>
+                    </select>
+                </div>
+                <div class="form-group" id="status-group" style="display:none;">
+                    <label class="form-label">Status</label>
+                    <select id="f-status" class="form-select">
+                        <option value="Open">Open</option>
+                        <option value="Draft">Draft</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Posted Date + Closing Date -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Posted Date</label>
+                    <input type="date" id="f-posted-date" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Closing Date</label>
+                    <input type="date" id="f-closing-date" class="form-input" />
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea id="f-description" class="form-textarea" placeholder="Job description, responsibilities, and requirements..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeFormModal()">Cancel</button>
+                <button class="btn-save" onclick="submitForm()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Delete Confirm Modal ===== -->
+    <div class="dash-modal-overlay" id="delete-modal">
+        <div class="dash-modal-card narrow">
+            <button class="dash-modal-close" onclick="closeDeleteModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+            </button>
+            <div class="confirm-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+            </div>
+            <div class="confirm-title">Delete Job Posting</div>
+            <div class="confirm-text">Are you sure you want to delete this job posting? This action cannot be undone.</div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn-confirm-delete" onclick="doDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Toast ===== -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ===== Auth Modal ===== -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="auth-modal-card">
+            <button class="modal-close" onclick="closeSignInModal()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg></button>
+            <div id="step-provider" class="modal-step">
+                <div class="modal-logo"><div class="logo-icon" style="width:38px;height:38px;font-size:17px;">W</div><span class="brand-name" style="font-size:18px;">Work<span>Buddy</span></span></div>
+                <h2 class="modal-title">Sign in to WorkBuddy</h2>
+                <p class="modal-subtitle">Choose how you'd like to continue</p>
+                <button class="provider-btn" onclick="showEmailStep()"><span class="provider-icon email"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="white"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg></span>Continue with Email</button>
+            </div>
+            <div id="step-loading" class="modal-step" style="display:none;"><div class="modal-loading"><div class="spinner"></div><p id="loading-text">Connecting...</p></div></div>
+            <div id="step-email" class="modal-step" style="display:none;">
+                <button class="modal-back" onclick="showProviderStep()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg> Back</button>
+                <h2 class="modal-title">Sign in</h2>
+                <p class="modal-subtitle">Use your WorkBuddy username or email</p>
+                <div class="modal-form-group"><label class="modal-label">Username or Email</label><input type="text" id="email-username" class="modal-input" placeholder="username or you@example.com" /></div>
+                <div class="modal-form-group"><label class="modal-label">Password</label><input type="password" id="email-password" class="modal-input" placeholder="••••••••" /></div>
+                <button class="modal-submit" onclick="submitEmailSignIn()">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        /* ── Auth guard ── */
+        (function () {
+            if (!getUser()) {
+                window.location.href = 'services.html';
+            }
+        })();
+
+        /* ── State ── */
+        let editingId      = null;
+        let deleteTargetId = null;
+        let isAdmin        = false;
+        let _cachedRecords = [];
+
+        /* ── Helpers ── */
+        function showToast(type, msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className   = 'toast ' + type + ' show';
+            setTimeout(() => { t.className = 'toast'; }, 3000);
+        }
+
+        function statusBadge(status) {
+            const map = {
+                'Open':   'badge-green',
+                'Closed': 'badge-red',
+                'Draft':  'badge-gray'
+            };
+            const cls = map[status] || 'badge-gray';
+            return `<span class="badge ${cls}">${status || '—'}</span>`;
+        }
+
+        function fmtDate(val) {
+            if (!val) return '—';
+            try { return new Date(val).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }); }
+            catch { return val; }
+        }
+
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        /* ── Load Data ── */
+        async function loadData() {
+            const tbody = document.getElementById('recruitment-tbody');
+            tbody.innerHTML = '<tr class="loading-row"><td colspan="8">Loading job postings...</td></tr>';
+            try {
+                _cachedRecords = await Api.recruitment.getAll() || [];
+                renderTable(_cachedRecords);
+            } catch {
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
+                    <p>Failed to load job postings</p>Could not connect to server</td></tr>`;
+            }
+        }
+
+        function renderTable(records) {
+            const tbody = document.getElementById('recruitment-tbody');
+            if (!records.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z" /></svg>
+                    <p>No job postings found</p>Post a job to get started</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = records.map(r => `
+                <tr>
+                    <td><div class="cell-name">${escHtml(r.title || '—')}</div></td>
+                    <td>${escHtml(r.department || '—')}</td>
+                    <td>${escHtml(r.location || '—')}</td>
+                    <td>${escHtml(r.type || '—')}</td>
+                    <td>${statusBadge(r.status)}</td>
+                    <td>${fmtDate(r.postedDate)}</td>
+                    <td>${fmtDate(r.closingDate)}</td>
+                    ${isAdmin ? `<td>
+                        <div class="action-btns">
+                            ${r.status === 'Open' ? `
+                            <button class="btn-icon warn" title="Close Job" onclick="closeJob(${r.id})">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                            </button>` : ''}
+                            <button class="btn-icon" title="Edit" onclick="openEditModal(${r.id})">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
+                            </button>
+                            <button class="btn-icon danger" title="Delete" onclick="openDeleteModal(${r.id})">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                            </button>
+                        </div>
+                    </td>` : ''}
+                </tr>`).join('');
+        }
+
+        /* ── Modals ── */
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('form-modal-title').textContent = 'Post Job';
+            clearForm();
+            // Hide status field for new postings (defaults to Open)
+            document.getElementById('status-group').style.display = 'none';
+            document.getElementById('form-modal').classList.add('open');
+        }
+
+        function openEditModal(id) {
+            const r = _cachedRecords.find(x => x.id === id);
+            if (!r) return;
+            editingId = id;
+            document.getElementById('form-modal-title').textContent = 'Edit Job Posting';
+            document.getElementById('f-title').value        = r.title       || '';
+            document.getElementById('f-department').value   = r.department  || '';
+            document.getElementById('f-location').value     = r.location    || '';
+            document.getElementById('f-type').value         = r.type        || 'Full-Time';
+            document.getElementById('f-status').value       = r.status      || 'Open';
+            document.getElementById('f-posted-date').value  = r.postedDate  ? r.postedDate.substring(0, 10)  : '';
+            document.getElementById('f-closing-date').value = r.closingDate ? r.closingDate.substring(0, 10) : '';
+            document.getElementById('f-description').value  = r.description || '';
+            // Show status field when editing
+            document.getElementById('status-group').style.display = 'block';
+            document.getElementById('form-modal').classList.add('open');
+        }
+
+        function closeFormModal() {
+            document.getElementById('form-modal').classList.remove('open');
+        }
+
+        function openDeleteModal(id) {
+            deleteTargetId = id;
+            document.getElementById('delete-modal').classList.add('open');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.remove('open');
+        }
+
+        function clearForm() {
+            ['f-title','f-department','f-location','f-posted-date','f-closing-date','f-description'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('f-type').value   = 'Full-Time';
+            document.getElementById('f-status').value = 'Open';
+        }
+
+        /* ── Submit (create / update) ── */
+        async function submitForm() {
+            const isEdit = !!editingId;
+            const data = {
+                title:       document.getElementById('f-title').value.trim(),
+                department:  document.getElementById('f-department').value.trim(),
+                location:    document.getElementById('f-location').value.trim(),
+                type:        document.getElementById('f-type').value,
+                status:      isEdit ? document.getElementById('f-status').value : 'Open',
+                postedDate:  document.getElementById('f-posted-date').value  || null,
+                closingDate: document.getElementById('f-closing-date').value || null,
+                description: document.getElementById('f-description').value.trim()
+            };
+
+            if (!data.title) {
+                showToast('error', 'Title is required');
+                return;
+            }
+
+            try {
+                if (isEdit) {
+                    await Api.recruitment.update(editingId, data);
+                    showToast('success', 'Job posting updated successfully');
+                } else {
+                    await Api.recruitment.create(data);
+                    showToast('success', 'Job posted successfully');
+                }
+                closeFormModal();
+                await loadData();
+            } catch {
+                showToast('error', 'Failed to save job posting');
+            }
+        }
+
+        /* ── Close job ── */
+        async function closeJob(id) {
+            try {
+                await Api.recruitment.close(id);
+                await loadData();
+                showToast('success', 'Job posting closed');
+            } catch {
+                showToast('error', 'Failed to close job posting');
+            }
+        }
+
+        /* ── Delete ── */
+        async function doDelete() {
+            if (!deleteTargetId) return;
+            try {
+                await Api.recruitment.delete(deleteTargetId);
+                showToast('success', 'Job posting deleted');
+                closeDeleteModal();
+                await loadData();
+            } catch {
+                showToast('error', 'Failed to delete job posting');
+            }
+        }
+
+        /* ── Init ── */
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const user = getUser();
+            if (!user) {
+                window.location.href = 'services.html';
+                return;
+            }
+
+            initNavAuth();
+
+            isAdmin = user.role === 'admin';
+
+            if (isAdmin) {
+                document.getElementById('btn-post-job').style.display = 'inline-flex';
+                document.getElementById('th-actions').style.display = 'table-cell';
+            }
+
+            loadData();
+        });
+
+        /* Close modals on overlay click */
+        document.getElementById('form-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeFormModal();
+        });
+        document.getElementById('delete-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+    </script>
+
+</body>
+</html>

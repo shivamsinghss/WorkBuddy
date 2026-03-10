@@ -1,0 +1,398 @@
+{
+  "info": {
+    "name": "WorkBuddy API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "employee_id", "value": "" },
+    { "key": "leave_id", "value": "" },
+    { "key": "payroll_id", "value": "" },
+    { "key": "performance_id", "value": "" },
+    { "key": "training_id", "value": "" },
+    { "key": "recruitment_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (Employee by Email)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"john.doe@company.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (Employee by Username)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"johndoe\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (Invalid Credentials)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"wrong\",\n  \"password\": \"wrong\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employees",
+      "item": [
+        {
+          "name": "Get All Employees",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/employees"
+          }
+        },
+        {
+          "name": "Get Employee by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/employees/{{employee_id}}"
+          }
+        },
+        {
+          "name": "Create Employee",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@company.com\",\n  \"phone\": \"+1 234 567 8900\",\n  \"department\": \"Engineering\",\n  \"position\": \"Software Engineer\",\n  \"joinDate\": \"2024-01-15\",\n  \"salary\": 85000,\n  \"status\": \"Active\",\n  \"username\": \"johndoe\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Employee",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/employees/{{employee_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@company.com\",\n  \"phone\": \"+1 234 567 8900\",\n  \"department\": \"Engineering\",\n  \"position\": \"Senior Software Engineer\",\n  \"joinDate\": \"2024-01-15\",\n  \"salary\": 95000,\n  \"status\": \"Active\",\n  \"username\": \"johndoe\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Employee",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/employees/{{employee_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leave & Attendance",
+      "item": [
+        {
+          "name": "Get All Leave Requests",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/leaves"
+          }
+        },
+        {
+          "name": "Get Leave by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/leaves/{{leave_id}}"
+          }
+        },
+        {
+          "name": "Submit Leave Request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/leaves",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employee_id}}\",\n  \"employeeName\": \"John Doe\",\n  \"type\": \"Sick Leave\",\n  \"startDate\": \"2026-03-15\",\n  \"endDate\": \"2026-03-17\",\n  \"days\": 3,\n  \"reason\": \"Medical appointment\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Approve Leave",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/leaves/{{leave_id}}/approve"
+          }
+        },
+        {
+          "name": "Reject Leave",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/leaves/{{leave_id}}/reject"
+          }
+        },
+        {
+          "name": "Update Leave",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/leaves/{{leave_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employee_id}}\",\n  \"employeeName\": \"John Doe\",\n  \"type\": \"Annual Leave\",\n  \"startDate\": \"2026-03-20\",\n  \"endDate\": \"2026-03-22\",\n  \"days\": 3,\n  \"reason\": \"Vacation\",\n  \"status\": \"Pending\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Leave",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/leaves/{{leave_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payroll",
+      "item": [
+        {
+          "name": "Get All Payroll Records",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/payroll"
+          }
+        },
+        {
+          "name": "Get Payroll by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/payroll/{{payroll_id}}"
+          }
+        },
+        {
+          "name": "Create Payroll Record",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/payroll",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employee_id}}\",\n  \"employeeName\": \"John Doe\",\n  \"month\": \"March\",\n  \"year\": 2026,\n  \"basicSalary\": 85000,\n  \"bonus\": 5000,\n  \"deductions\": 8500\n}"
+            }
+          }
+        },
+        {
+          "name": "Mark Payroll as Paid",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/payroll/{{payroll_id}}/pay"
+          }
+        },
+        {
+          "name": "Update Payroll Record",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/payroll/{{payroll_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employee_id}}\",\n  \"employeeName\": \"John Doe\",\n  \"month\": \"March\",\n  \"year\": 2026,\n  \"basicSalary\": 85000,\n  \"bonus\": 7000,\n  \"deductions\": 8500,\n  \"status\": \"Pending\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Payroll Record",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/payroll/{{payroll_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Performance Reviews",
+      "item": [
+        {
+          "name": "Get All Reviews",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/performance"
+          }
+        },
+        {
+          "name": "Get Review by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/performance/{{performance_id}}"
+          }
+        },
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/performance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employee_id}}\",\n  \"employeeName\": \"John Doe\",\n  \"reviewPeriod\": \"Q1 2026\",\n  \"reviewerName\": \"Jane Smith\",\n  \"rating\": 4,\n  \"comments\": \"Excellent performance this quarter.\",\n  \"goals\": \"Lead the new module delivery in Q2\",\n  \"status\": \"Completed\",\n  \"reviewDate\": \"2026-03-09\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/performance/{{performance_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employee_id}}\",\n  \"employeeName\": \"John Doe\",\n  \"reviewPeriod\": \"Q1 2026\",\n  \"reviewerName\": \"Jane Smith\",\n  \"rating\": 5,\n  \"comments\": \"Outstanding — exceeded all targets.\",\n  \"goals\": \"Lead the new module delivery in Q2\",\n  \"status\": \"Completed\",\n  \"reviewDate\": \"2026-03-09\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/performance/{{performance_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Training & Development",
+      "item": [
+        {
+          "name": "Get All Training Records",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/training"
+          }
+        },
+        {
+          "name": "Get Training by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/training/{{training_id}}"
+          }
+        },
+        {
+          "name": "Create Training",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/training",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spring Boot Advanced\",\n  \"description\": \"Deep dive into Spring Boot 3+ features.\",\n  \"trainer\": \"Alice Johnson\",\n  \"startDate\": \"2026-04-01\",\n  \"endDate\": \"2026-04-03\",\n  \"participants\": 15\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Training",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/training/{{training_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spring Boot Advanced\",\n  \"description\": \"Deep dive into Spring Boot 3+ features.\",\n  \"trainer\": \"Alice Johnson\",\n  \"startDate\": \"2026-04-01\",\n  \"endDate\": \"2026-04-03\",\n  \"participants\": 20,\n  \"status\": \"Upcoming\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Training",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/training/{{training_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recruitment",
+      "item": [
+        {
+          "name": "Get All Job Posts",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/recruitment"
+          }
+        },
+        {
+          "name": "Get Job Post by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/recruitment/{{recruitment_id}}"
+          }
+        },
+        {
+          "name": "Create Job Post",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/recruitment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Backend Engineer\",\n  \"department\": \"Engineering\",\n  \"description\": \"Looking for a Spring Boot developer with 3+ years experience.\",\n  \"location\": \"Remote\",\n  \"type\": \"Full-Time\",\n  \"postedDate\": \"2026-03-09\",\n  \"closingDate\": \"2026-04-09\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Close Job Post",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/recruitment/{{recruitment_id}}/close"
+          }
+        },
+        {
+          "name": "Update Job Post",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/recruitment/{{recruitment_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Backend Engineer\",\n  \"department\": \"Engineering\",\n  \"description\": \"Looking for a Spring Boot developer with 5+ years experience.\",\n  \"location\": \"Remote\",\n  \"type\": \"Full-Time\",\n  \"status\": \"Open\",\n  \"postedDate\": \"2026-03-09\",\n  \"closingDate\": \"2026-04-30\",\n  \"applicants\": 12\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Job Post",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/recruitment/{{recruitment_id}}"
+          }
+        }
+      ]
+    }
+  ]
+}
