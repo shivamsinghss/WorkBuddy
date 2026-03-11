@@ -2,13 +2,17 @@
 
 > *One platform. Every HR operation. Zero infrastructure overhead.*
 
+🌐 **WorkBuddy website url link:** [https://shivamsinghss.github.io/WorkBuddy/src/main/resources/static/index.html](https://shivamsinghss.github.io/WorkBuddy/src/main/resources/static/index.html)
+
 ---
 
 ## Executive Summary
 
-WorkBuddy is a self-hosted HR management platform built for startups, small businesses, and internal teams that need a fast, reliable, and cost-effective way to manage their workforce — without the complexity of enterprise tools or the cost of SaaS subscriptions.
+WorkBuddy is a **free, professional HR management portal built specifically for small business owners** who need enterprise-grade HR capabilities without enterprise-grade costs. Whether you run a team of 5 or 50, WorkBuddy gives you the same tools used by large companies — employee management, attendance, leave, payroll, performance reviews, training, and recruitment — all in one place, completely free.
 
-At its core, WorkBuddy centralizes six critical HR operations — employee management, attendance, leave, payroll, performance, and recruitment — into a single, role-aware portal. With a planned scheduler engine, WorkBuddy will automate routine HR tasks like monthly payroll generation, training assignments, and recruitment pipeline updates, reducing manual effort to near zero.
+No subscription. No credit card. No IT team required. Just sign in and start managing your team like a pro.
+
+At its core, WorkBuddy centralizes six critical HR operations into a single, role-aware portal. With a planned scheduler engine, WorkBuddy will automate routine HR tasks like monthly payroll generation, training assignments, and recruitment pipeline updates, reducing manual effort to near zero.
 
 ---
 
@@ -25,6 +29,99 @@ At its core, WorkBuddy centralizes six critical HR operations — employee manag
 | **SaaS dependency** | Your data lives on someone else's server, behind a monthly bill |
 
 Small teams spend **4–6 hours per week** on HR admin that could be automated. That's time taken away from building product, serving customers, and growing the business.
+
+---
+
+## Who Is This For?
+
+WorkBuddy was built for **small business owners** who:
+- Are tired of managing HR across WhatsApp, Excel, and email
+- Can't afford BambooHR, Zoho People, or SAP
+- Want a professional HR system that just works — for free
+- Need both a management view (admin) and a self-service view (employees)
+
+> WorkBuddy gives your small business the same HR discipline as a 500-person company — at zero cost.
+
+---
+
+## How to Use WorkBuddy
+
+### Getting Started
+
+1. Visit the live portal: [WorkBuddy](https://shivamsinghss.github.io/WorkBuddy/src/main/resources/static/index.html)
+2. Click **Get Started**
+3. Sign in with your credentials
+4. You will automatically land in the right view based on your role
+
+> **Note:** The backend runs on a free server instance. The first request may take up to **50 seconds** to wake up. Please be patient on first sign-in.
+
+---
+
+### Admin Point of View
+
+> Sign in with: **admin credentials** to have admin power/role
+
+As an admin (business owner or HR manager), you have **full control** over every module.
+
+#### Employees
+- Add new employees with their name, department, position, salary, and login credentials
+- Edit or remove existing employees
+- Every employee you add gets their own login to access the portal
+
+#### Leave & Attendance
+- View all leave, WFH, and Comp Off requests from every employee
+- **Approve** or **Reject** requests with one click
+- Rejecting a leave request automatically restores the employee's leave credit
+- Add leave credits to any employee's balance
+
+#### Payroll
+- Create monthly salary records for each employee
+- Set basic salary (auto-filled from employee profile), bonus, and deductions
+- Net salary is calculated automatically
+- Mark records as **Paid** once processed
+- Download any employee's pay slip for a specific month or full year
+
+#### Performance
+- Create and manage performance review records for employees
+- Track ratings and feedback per review cycle
+
+#### Training
+- Add training programs and assign them to employees
+- Track completion status across your team
+
+#### Recruitment
+- Post open job positions with department, role, and description
+- Track hiring pipeline from open to closed
+
+---
+
+### Employee Point of View
+
+> Sign in with credentials set by the admin when your profile was created
+
+As an employee, you have a **self-service portal** — you only see and manage your own data.
+
+#### Leave & Attendance
+- View your **today's status card** — mark yourself as Office, WFH, or On Leave for the day
+- **Punch In** when you start work, **Punch Out** when you finish — timestamps are recorded
+- Once you mark your status for the day, it is locked and cannot be changed
+- Apply for **Leave**, **WFH**, or **Comp Off** from the Apply tab
+- Track all your past requests and their approval status
+- View your leave credit balance
+
+#### Payroll
+- See your **Yearly Salary** and **Fixed Monthly Gross** at the top of the page
+- View all your payroll records — basic, bonus, deductions, net salary, and payment status
+- **Download your pay slip** for any specific month or for a full year (opens as printable PDF)
+
+#### Performance
+- View your own performance review history — ratings and feedback from your manager
+
+#### Training
+- View training programs assigned to you and track your completion status
+
+#### Recruitment
+- Browse open job postings within the company
 
 ---
 
