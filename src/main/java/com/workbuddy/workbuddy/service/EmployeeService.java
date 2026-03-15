@@ -61,6 +61,14 @@ public class EmployeeService {
         List<Employee> all = getAll();
         for (int i = 0; i < all.size(); i++) {
             if (all.get(i).getId().equals(id)) {
+                Employee existing = all.get(i);
+                // preserve credentials when not supplied by the edit form
+                if (updated.getUsername() == null || updated.getUsername().isEmpty()) {
+                    updated.setUsername(existing.getUsername());
+                }
+                if (updated.getPassword() == null || updated.getPassword().isEmpty()) {
+                    updated.setPassword(existing.getPassword());
+                }
                 updated.setId(id);
                 all.set(i, updated);
                 rewrite(all);
@@ -104,18 +112,18 @@ public class EmployeeService {
     }
 
     private void toRow(Employee e, Row row) {
-        row.createCell(0).setCellValue(e.getId());
-        row.createCell(1).setCellValue(e.getFirstName());
-        row.createCell(2).setCellValue(e.getLastName());
-        row.createCell(3).setCellValue(e.getEmail());
-        row.createCell(4).setCellValue(e.getPhone());
-        row.createCell(5).setCellValue(e.getDepartment());
-        row.createCell(6).setCellValue(e.getPosition());
-        row.createCell(7).setCellValue(e.getJoinDate());
+        row.createCell(0).setCellValue(e.getId()         != null ? e.getId()         : "");
+        row.createCell(1).setCellValue(e.getFirstName()  != null ? e.getFirstName()  : "");
+        row.createCell(2).setCellValue(e.getLastName()   != null ? e.getLastName()   : "");
+        row.createCell(3).setCellValue(e.getEmail()      != null ? e.getEmail()      : "");
+        row.createCell(4).setCellValue(e.getPhone()      != null ? e.getPhone()      : "");
+        row.createCell(5).setCellValue(e.getDepartment() != null ? e.getDepartment() : "");
+        row.createCell(6).setCellValue(e.getPosition()   != null ? e.getPosition()   : "");
+        row.createCell(7).setCellValue(e.getJoinDate()   != null ? e.getJoinDate()   : "");
         row.createCell(8).setCellValue(e.getSalary());
-        row.createCell(9).setCellValue(e.getStatus());
-        row.createCell(10).setCellValue(e.getUsername() != null ? e.getUsername() : "");
-        row.createCell(11).setCellValue(e.getPassword() != null ? e.getPassword() : "");
+        row.createCell(9).setCellValue(e.getStatus()     != null ? e.getStatus()     : "");
+        row.createCell(10).setCellValue(e.getUsername()  != null ? e.getUsername()   : "");
+        row.createCell(11).setCellValue(e.getPassword()  != null ? e.getPassword()   : "");
     }
 
     private void writeHeader(XSSFSheet sheet) {
