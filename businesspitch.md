@@ -55,8 +55,7 @@ Add employees, set roles, manage profiles — all in one table. Every employee y
 **Admin view:** Full CRUD — add, edit, deactivate
 **Employee view:** Read-only access to their own profile
 
-> ![img_2.png](screenshots/img_2.png)
-
+> ![Screenshot 2026-03-15 at 8.31.02 PM.png](screenshots/Screenshot%202026-03-15%20at%208.31.02%E2%80%AFPM.png)
 ---
 
 ### 2. Leave & Attendance
@@ -65,12 +64,7 @@ Employees apply for **Leave, WFH, or Comp Off** in one click. Admins approve or 
 
 Built-in **Punch In / Punch Out** tracking with timestamps. Today's status card locks once submitted — no editing, no disputes.
 
-> **Screenshot placeholder**
-> _Add screenshot of `leaves.html` showing leave requests + today's status card_
-> Suggested filename: `screenshots/04-leaves.png`
-
----
-
+>![Screenshot 2026-03-15 at 8.34.43 PM.png](screenshots/Screenshot%202026-03-15%20at%208.34.43%E2%80%AFPM.png)
 ### 3. Payroll
 
 Set yearly salary once. Monthly gross is calculated automatically. Add bonus and deductions per record. Mark as Paid when processed.

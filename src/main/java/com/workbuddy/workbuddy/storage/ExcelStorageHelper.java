@@ -20,8 +20,12 @@ public class ExcelStorageHelper {
     private String dataPath;
 
     @PostConstruct
-    public void init() {
-        new File(dataPath).mkdirs();
+    public void init() throws IOException {
+        // Resolve to absolute path so data location is stable regardless of
+        // which directory the JVM is started from (e.g. build/libs vs project root).
+        File dir = new File(dataPath).getCanonicalFile();
+        dir.mkdirs();
+        dataPath = dir.getAbsolutePath();
     }
 
     public XSSFWorkbook openOrCreate(String fileName) throws IOException {

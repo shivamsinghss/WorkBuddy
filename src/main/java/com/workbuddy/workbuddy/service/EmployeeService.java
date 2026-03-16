@@ -52,7 +52,7 @@ public class EmployeeService {
             sheet = wb.createSheet(SHEET);
             writeHeader(sheet);
         }
-        toRow(employee, sheet.createRow(sheet.getPhysicalNumberOfRows()));
+        toRow(employee, sheet.createRow(sheet.getLastRowNum() + 1));
         storage.save(wb, FILE);
         return employee;
     }
