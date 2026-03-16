@@ -29,7 +29,7 @@ public class EmployeeService {
     public List<Employee> getAll() throws IOException {
         List<Employee> list = new ArrayList<>();
         XSSFWorkbook wb = storage.openOrCreate(FILE);
-        XSSFSheet sheet = wb.getSheet(SHEET);
+        XSSFSheet sheet = getSheet(wb);
         if (sheet != null) {
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
@@ -47,7 +47,7 @@ public class EmployeeService {
     public Employee create(Employee employee) throws IOException {
         employee.setId(storage.generateId());
         XSSFWorkbook wb = storage.openOrCreate(FILE);
-        XSSFSheet sheet = wb.getSheet(SHEET);
+        XSSFSheet sheet = getSheet(wb);
         if (sheet == null) {
             sheet = wb.createSheet(SHEET);
             writeHeader(sheet);
@@ -92,6 +92,16 @@ public class EmployeeService {
         int i = 1;
         for (Employee e : list) toRow(e, sheet.createRow(i++));
         storage.save(wb, FILE);
+    }
+
+    // Returns the "Employees" sheet, falling back to the first sheet in the
+    // workbook so that files created manually in Excel (named "Sheet1") still work.
+    private XSSFSheet getSheet(XSSFWorkbook wb) {
+        XSSFSheet sheet = wb.getSheet(SHEET);
+        if (sheet == null && wb.getNumberOfSheets() > 0) {
+            sheet = wb.getSheetAt(0);
+        }
+        return sheet;
     }
 
     private Employee fromRow(Row row) {

@@ -71,9 +71,7 @@ Set yearly salary once. Monthly gross is calculated automatically. Add bonus and
 
 Employees can **download their own pay slip** — by month or full year — as a printable PDF, without ever contacting HR.
 
-> **Screenshot placeholder**
-> _Add screenshot of `payroll.html` showing salary records + download button_
-> Suggested filename: `screenshots/05-payroll.png`
+> ![img.png](img.png)
 
 ---
 
